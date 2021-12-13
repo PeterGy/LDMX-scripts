@@ -15,29 +15,47 @@ def hcalBinning():
 
 #One element for each plot. Each plot is a list of pairs, each element in the list being a line on the plot. 
 #The pair holds the plotvar, then the file it stems from   
+
+testbeamPlotGroups = [
+
+    #1.3
+    (('Total number of hits per event',"electron"),),
+    (('Sum of pulse height per event',"electron"),),    
+    #1.4
+    (('Distribution of number of hits for TS bars',"electron"),), 
+    (('Distribution of signal amplitude for TS bars',"electron"),), 
+    #1.5
+    (('Time difference between TS and HCal',"electron"),), 
+
+]
 plotGroups = [
+
+    (('Time difference between TS and HCal',"electron"),), 
     #(('trigSimX','Trigger_0.5e-'),),
     # (('simX',"Muons0.5"),),
     #(('recPE',"muon"),),
     # (('simEBar',"muon"),),
     # (('recEBar',"muon"),),
     # (('recX(Z)',"muon"),),
-    (('simX',"muon"),),
-    (('simY',"muon"),),
-    (('simZ',"muon"),),
-    (('simE',"muon"),),
+    # (('simX',"muon"),),
+    # (('simY',"muon"),),
+    # (('simZ',"muon"),),
+    # (('simE',"muon"),),
     # (('simEBar',"muon"),),
     # (('simEBar',"sim"),),
     # (('recX',"sim"),('recX',"fakerun"),),
     # (('recY',"sim"),('recY',"fakerun"),),
     # (('recZ',"sim"),('recZ',"fakerun"),),
     # (('recE',"sim"),('recE',"fakerun"),),
+    # (('recAmp',"electron"),),
+
+
     # (('recAmp',"sim"),('recAmp',"fakerun"),),
 
-    (('simX(Z)',"muon"),),
-    (('simY(Z)',"muon"),),
-    (('simY(X)',"muon"),),
-    (('simE(X)',"muon"),),
+    # (('simX(Z)',"muon"),),
+    # (('simY(Z)',"muon"),),
+    # (('simY(X)',"muon"),),
+    # (('simE(X)',"muon"),),
     # (('simE(Z)',"muon"),),
     
     # (('simX(Z)',"muon"),),
@@ -47,9 +65,10 @@ plotGroups = [
     # (('recY(Z)',"muon"),),
 
 
-    (('simEBar',"muon"),),
+    # (('simEBar',"muon"),),
     # (('recEBar',"muon"),),
     # (('recEventBar',"muon"),),
+    # (('recBarEvent',"muon"),),
 
     # (('recY(X)',"muon"),),
     # (('recE(Z)',"muon"),),
@@ -69,6 +88,10 @@ barBinsY = range(-1000,1001,50)
 barBinsZ = hcalBinning()
 
 plotDict = {
+    'Total number of hits per event'   :{'xaxis' : 'Hits', 'yaxis' : 'Counts', 'binning' : {'nBins':10, 'min':0, 'max':0}, 'dimension' : 1 }, #0,0 min-max makes the xrange automatic. nbins must be 10 so my program can manually set nbins to be the value it should really be automatically
+    'Sum of pulse height per event' :{'xaxis' : 'Pulse height [ns]', 'yaxis' : 'Counts', 'binning' : {'nBins':10, 'min':0, 'max':0}, 'dimension' : 1 },
+
+
     'simE'   :{'xaxis' : 'Energy [MeV]', 'yaxis' : 'Counts', 'binning' : {'nBins':40, 'min':0, 'max':40}, 'dimension' : 1 },
     'simEH1' :{'xaxis' : 'Energy [MeV]', 'yaxis' : 'Counts', 'binning' : {'nBins':40, 'min':0, 'max':10}, 'dimension' : 1 },
     'simEH2' :{'xaxis' : 'Energy [MeV]', 'yaxis' : 'Counts', 'binning' : {'nBins':40, 'min':0, 'max':10}, 'dimension' : 1 },
@@ -78,7 +101,12 @@ plotDict = {
     'simY' :{'xaxis' : 'Y Displacement [mm]', 'yaxis' : 'Counts', 'binning' : {'nBins':200, 'min':-1000, 'max':1000}, 'dimension' : 1},
     # 'simZ' :{'xaxis' : 'Penetration depth Z [mm]', 'yaxis' : 'Counts', 'binning' : {'nBins':90, 'min':-450, 'max':450}, 'dimension' : 1},
     'simZ' :{'xaxis' : 'Penetration depth Z [mm]', 'yaxis' : 'Counts', 'binning' : barBinsZ, 'dimension' : 1},
-    'recEventBar':{'xaxis' : 'Y Displacement [mm]', 'yaxis' : 'Counts', 'binning' : {'nBins':200, 'min':402654211, 'max':402668549}, 'dimension' : 1},
+    
+    # 'recEventBar':{'xaxis' : 'Y Displacement [mm]', 'yaxis' : 'Counts', 'binning' : {'nBins':200, 'min':402654210, 'max':402668549}, 'dimension' : 1},
+    'recEventBar':{'xaxis' : 'Bar ID', 'yaxis' : 'Counts', 'binning' : {'nBins':402672650-402656200, 'min':402656200, 'max':402672650}, 'dimension' : 1},
+    
+    'recBarEvent':{'xaxis' : 'Bar number', 'yaxis' : 'Counts', 'binning' : {'nBins':19, 'min':-0.5, 'max':18.5}, 'dimension' : 1},
+
 
 
     'recE' :{'xaxis' : 'Energy [MeV]', 'yaxis' : 'Counts', 'binning' : {'nBins':40, 'min':0, 'max':40} , 'dimension' : 1},
@@ -159,5 +187,9 @@ plotDict = {
     'trigSimY(X)' :{'xaxis' : 'X Displacement [mm]', 'yaxis' : 'Y Displacement [mm]', 'dimension' : 2,
                     'binningX' : {'nBins':200, 'min':-20, 'max':20}, 
                     'binningY' : {'nBins':200, 'min':-20, 'max':20}},  
-    'trigBarID'   :{'xaxis' : 'ID', 'yaxis' : 'Counts', 'binning' : {'nBins':50, 'min':0, 'max':50}, 'dimension' : 1 },                      
+
+    'Distribution of number of hits for TS bars':{'xaxis' : 'Bar ID', 'yaxis' : 'Counts', 'binning' : {'nBins':12, 'min':0, 'max':12}, 'dimension' : 1},
+    'Distribution of signal amplitude for TS bars':{'xaxis' : 'Bar ID', 'yaxis' : 'Signal Amplitude', 'binning' : {'nBins':12, 'min':0, 'max':12}, 'dimension' : 1},
+    'Time difference between TS and HCal':{'xaxis' : 'Time difference [ns]', 'yaxis' : 'Counts', 'binning' : {'nBins':50, 'min':0, 'max':50}, 'dimension' : 1},
+
     }    

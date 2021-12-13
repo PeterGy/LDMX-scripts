@@ -47,7 +47,7 @@ def createPad(plotDimension):
     pad.GetFrame().SetFillColor( 18 ) 
     if plotDimension == 1:
         pad.SetRightMargin(0.05)
-        pad.SetLeftMargin(0.05)  
+        pad.SetLeftMargin(0.1)  
     elif plotDimension == 2:
         pad.SetRightMargin(0.12)
         pad.SetLeftMargin(0.14)
@@ -60,7 +60,7 @@ def createLegend():
 
 def createInfoBox():
      #sets what the top right box should say. "" for nothing.
-    r.gStyle.SetOptStat("n")  
+    r.gStyle.SetOptStat("ne")  
 
 def createLabel():
     label = r.TLatex()
@@ -73,8 +73,8 @@ def createLabel():
 def drawLine(plotDimension,lines):
     # hist.SetOption("")
     if plotDimension == 1:
-        # lines[-1].Draw("HIST SAME")
-        lines[-1].Draw("SAME E")
+        lines[-1].Draw("HIST SAME")
+        # lines[-1].Draw("SAME E")
     if plotDimension == 2:
         lines[-1].Draw("COLZ SAME")  
 
@@ -140,6 +140,22 @@ def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxE
                 hist.Fill(h.getID())
                 #402654211:402668549
 
+    elif plotVar == 'recBarEvent': 
+        bars={}
+        for entry in allData:             
+            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
+                try: bars[h.getID()]+=1
+                except: bars[h.getID()]=1
+        barOrder=[]                               
+        for bar in bars:
+            barOrder.append(bar)
+        barOrder.sort()      
+        hist = r.TH1F(plotVar,"Event counts in each bar", len(bars) ,0,len(bars)) 
+        for i in range(len(barOrder)):
+            hist.Fill(i,bars[barOrder[i]])
+
+        hist.SetYTitle('counts')
+        hist.SetXTitle('bar ranking in bar ID')
 
     elif plotVar == 'recE': 
         for entry in allData: 
@@ -165,13 +181,50 @@ def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxE
             for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
                 if h.isNoise() == allowNoise: hist.Fill(h.getZPos()) 
 
+
+    elif plotVar == 'Total number of hits per event': 
+        for event in allData: 
+            totalCount=0
+            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
+                totalCount+=1
+            hist.Fill(totalCount) 
+        hist.BufferEmpty() #figures out the xrange        
+        minX = hist.GetXaxis().GetBinLowEdge(1)
+        maxX = hist.GetXaxis().GetBinLowEdge(11)
+        hist.SetBins(int(maxX - minX),minX,maxX) #makes it so there is one bin per event
+
+
+    elif plotVar == 'Sum of pulse height per event': 
+        for event in allData: 
+            totalAmplitude=0
+            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
+                totalAmplitude+=h.getAmplitude()
+            hist.Fill(totalAmplitude) 
+        hist.BufferEmpty() #figures out the xrange        
+        minX = hist.GetXaxis().GetBinLowEdge(1)
+        maxX = hist.GetXaxis().GetBinLowEdge(11)
+        hist.SetBins(int(maxX - minX),minX,maxX) #makes it so there is one bin per ns
+
+
+
+    elif plotVar == 'Total number of hits per run': 
+        totalAmplitude=0
+        for event in allData:             
+            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
+                totalAmplitude+=1
+                # totalAmplitude+=h.getAmplitude()
+        hist.Fill(totalAmplitude) 
+
     elif plotVar == 'recAmp': 
+        entryCount=0
         for entry in allData: 
+            entryCount+=1
             for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
                 if h.isNoise() == allowNoise: hist.Fill(h.getAmplitude()) 
 
                     #h.getID() repeats even in rec mode
                     # print("rec id",h.getID()-4026e5)
+        print(entryCount)            
     elif plotVar == 'recPE': 
         for entry in allData: 
             for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
@@ -249,11 +302,7 @@ def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxE
         for entry in allData: 
             for ih,h in enumerate(getattr(entry, "TriggerPadUpSimHits_"+processName)):
                 hist.Fill(h.getPosition()[2],h.getEdep()) 
-    elif plotVar == 'trigBarID': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "TriggerPadUpSimHits_"+processName)):
-                hist.Fill(h.getID()) 
-                # hist.Fill(h.bar()) 
+
 
     # elif plotVar == 'trigRecX': 
         # for entry in allData: 
@@ -269,12 +318,33 @@ def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxE
                 # print(h.getBarID())
                 # print(h.items()) 
 
+    elif plotVar == 'Distribution of number of hits for TS bars': 
+        for event in allData: 
+            for ih,h in enumerate(getattr(event, "trigScintRecHitsUp_"+processName)):
+                hist.Fill(h.getBarID())
+
+    elif plotVar == 'Distribution of signal amplitude for TS bars': 
+        for event in allData: 
+            for ih,h in enumerate(getattr(event, "trigScintRecHitsUp_"+processName)):
+                hist.Fill(h.getBarID(),h.getAmplitude())
+
+    elif plotVar == 'Time difference between TS and HCal': 
+        for event in allData: #I define time difference based on the first event's time
+            trigTimes=[]
+            hcalTimes=[]
+            for ih,h in enumerate(getattr(event, "trigScintRecHitsUp_"+processName)):
+                trigTimes.append(h.getTime())
+            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
+                hcalTimes.append(h.getTime())
+            hist.Fill(min(hcalTimes)-min(trigTimes))
+
     return hist                
 
   
 def createHist(plotDict,plotVar):
     if plotDict[plotVar]['dimension'] == 1:     
-        histTitle = ""     
+        # histTitle = 'Event counts in each bar'     
+        histTitle = ''     
         binning = plotDict[plotVar]['binning']                
         if type(binning) == type({}):                     
             hist = r.TH1F(plotVar,histTitle,binning['nBins'],binning['min'],binning['max']) #name, title, nbins, start, finish          
@@ -293,6 +363,9 @@ def createHist(plotDict,plotVar):
             hist = r.TH2F(plotVar,histTitle, len(binningX)-1, array('f',binningX) #name, title, nbins, start, finish
             , len(binningY)-1, array('f',binningY)) #nbins, start, finish                    
   
+    # elif plotDict[plotVar]['dimension'] == "bar":
+    #     binLabelsEvtType = ["Nothing hard","1n","2n","#geq 3n","1#pi","2#pi", "1#pi_{0}", "1#pi 1N", "1p","2N","exotics","multi-body"]
+    #     hist.GetXaxis().SetBinLabel(b+1, binLabelsEvtType[b])
 
     hist.SetYTitle(plotDict[plotVar]['yaxis'])
     hist.SetXTitle(plotDict[plotVar]['xaxis'])
@@ -327,14 +400,14 @@ def normaliseHist():
         except: print("didnt normalise")
 
 # def main():       
-for plotNumber in range(len(plotGroups)):
+for plotNumber in range(len(plotGroups)): #creates a plot
     plotDimension =  getPlotDimension(plotNumber)
     canvas = createCanvas()
     createInfoBox()
     pad = createPad(plotDimension)      
     legend = createLegend()        
     lines=[]     
-    for j in plotGroups[plotNumber]: #creates a line for each variable you are going to plot
+    for j in plotGroups[plotNumber]: #creates a line for each variable in the plot
         plotVar = var  = j[0]
         fileName = j[1]           
         inFile = r.TFile(fileName+".root","READ")  
