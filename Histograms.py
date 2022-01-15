@@ -13,83 +13,73 @@ def hcalBinning():
         binning.append(i*layer_thickness + first_layer_zpos + absorber_thickness + bar_mounting_plate_thickness + scint_adhesive_thickness + scint_thickness +0.0001)
     return binning
 
+def hcalBarIDs():
+    barIDs=[]
+    startID=402654208
+    for layer in range(0,19):
+        if layer <=8:
+            for bar in range(0,8):
+                barIDs.append(startID + layer*1024 + bar)
+        else:    
+            for bar in range(0,12):
+                barIDs.append(startID + layer*1024 + bar)
+    return barIDs  
+
+def trigScintBarIDs():
+    return range(0,12) 
+
 #One element for each plot. Each plot is a list of pairs, each element in the list being a line on the plot. 
 #The pair holds the plotvar, then the file it stems from   
 
 testbeamPlotGroups = [
 
+    #1.1
+    # (('Distribution of number of hits of each bar',"muon"),), 
+    (('Mapped distribution of number of hits of each bar',"e-1GeV1k"),),
+    #1.2
+    # (('Distribution of pulse height of each bar',"electron"),), #192
+    
     #1.3
-    (('Total number of hits per event',"electron"),),
-    (('Sum of pulse height per event',"electron"),),    
+    (('Sum of pulse height per run',"runs"),),
+    (('Sum of pulse height per event',"runs"),),    
+    (('Total number of hits per event',"runs"),),
+    (('Total number of hits per run',"runs"),),    
     #1.4
     (('Distribution of number of hits for TS bars',"electron"),), 
     (('Distribution of signal amplitude for TS bars',"electron"),), 
+    (('Distribution of signal amplitude for TS bars (individual bars)',"electron"),), #12
     #1.5
     (('Time difference between TS and HCal',"electron"),), 
+    #2.1
+    (('Reconstructed energy for tags',"e-1GeV1k"),), 
+    #2.2
+    (('Reconstructed energy for tags',"pi-1GeV1k"),), 
+    #2.3
+    (('Energy as a function of the incoming particle angle',"pi-1GeV1k"),),
+    #3.1
+    # (('Distribution of PEs per HCal bar',"mu-4GeV1k"),), #192
+    # (('Mapped Distribution of PEs per HCal bar',"mu-4GeV1k"),),
+    
 
+    
 ]
-plotGroups = [
-
-    (('Time difference between TS and HCal',"electron"),), 
-    #(('trigSimX','Trigger_0.5e-'),),
-    # (('simX',"Muons0.5"),),
-    #(('recPE',"muon"),),
-    # (('simEBar',"muon"),),
-    # (('recEBar',"muon"),),
-    # (('recX(Z)',"muon"),),
-    # (('simX',"muon"),),
-    # (('simY',"muon"),),
-    # (('simZ',"muon"),),
-    # (('simE',"muon"),),
-    # (('simEBar',"muon"),),
-    # (('simEBar',"sim"),),
-    # (('recX',"sim"),('recX',"fakerun"),),
-    # (('recY',"sim"),('recY',"fakerun"),),
-    # (('recZ',"sim"),('recZ',"fakerun"),),
-    # (('recE',"sim"),('recE',"fakerun"),),
-    # (('recAmp',"electron"),),
-
-
-    # (('recAmp',"sim"),('recAmp',"fakerun"),),
-
-    # (('simX(Z)',"muon"),),
-    # (('simY(Z)',"muon"),),
-    # (('simY(X)',"muon"),),
-    # (('simE(X)',"muon"),),
-    # (('simE(Z)',"muon"),),
+# plotGroups = [
+#     (('Mapped Distribution of PEs per HCal bar',"mu-4GeV1k"),),
+#     (('Distribution of PEs per HCal bar',"mu-4GeV1k"),), #192
     
-    # (('simX(Z)',"muon"),),
-    # (('simY(Z)',"muon"),),
+#     ]         
 
-    # (('recX(Z)',"muon"),),
-    # (('recY(Z)',"muon"),),
-
-
-    # (('simEBar',"muon"),),
-    # (('recEBar',"muon"),),
-    # (('recEventBar',"muon"),),
-    # (('recBarEvent',"muon"),),
-
-    # (('recY(X)',"muon"),),
-    # (('recE(Z)',"muon"),),
-    
-    # (('trigRecX','Trigger_0.5e-'),),
-    # (('trigRecT','Trigger_0.5e-'),),
-    # (('trigSimX(Z)','Trigger_0.5e-'),),
-    # (('trigSimY(Z)','Trigger_0.5e-'),),
-    # (('trigSimY(X)','Trigger_0.5e-'),),
-    # (('trigSimE','Trigger_0.5e-'),),
-    # (('simX','mu'),),
-
-    ]         
+plotGroups = testbeamPlotGroups   
 
 barBinsX = range(-1000,1001,50)
 barBinsY = range(-1000,1001,50)
 barBinsZ = hcalBinning()
 
 plotDict = {
-    'Total number of hits per event'   :{'xaxis' : 'Hits', 'yaxis' : 'Counts', 'binning' : {'nBins':10, 'min':0, 'max':0}, 'dimension' : 1 }, #0,0 min-max makes the xrange automatic. nbins must be 10 so my program can manually set nbins to be the value it should really be automatically
-    'Sum of pulse height per event' :{'xaxis' : 'Pulse height [ns]', 'yaxis' : 'Counts', 'binning' : {'nBins':10, 'min':0, 'max':0}, 'dimension' : 1 },
+    'Total number of hits per event'   :{'xaxis' : 'Hits', 'yaxis' : 'Event count', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1 }, #0,0 min-max makes the xrange automatic. nbins must be 10 so my program can manually set nbins to be the value it should really be automatically
+    'Total number of hits per run'   :{'xaxis' : 'Hits', 'yaxis' : 'Run count', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1 }, #0,0 min-max makes the xrange automatic. nbins must be 10 so my program can manually set nbins to be the value it should really be automatically
+    'Sum of pulse height per event' :{'xaxis' : 'Pulse height [??]', 'yaxis' : 'Event count', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1 },
+    'Sum of pulse height per run' :{'xaxis' : 'Pulse height [??]', 'yaxis' : 'Run count', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1 },
 
 
     'simE'   :{'xaxis' : 'Energy [MeV]', 'yaxis' : 'Counts', 'binning' : {'nBins':40, 'min':0, 'max':40}, 'dimension' : 1 },
@@ -188,8 +178,26 @@ plotDict = {
                     'binningX' : {'nBins':200, 'min':-20, 'max':20}, 
                     'binningY' : {'nBins':200, 'min':-20, 'max':20}},  
 
-    'Distribution of number of hits for TS bars':{'xaxis' : 'Bar ID', 'yaxis' : 'Counts', 'binning' : {'nBins':12, 'min':0, 'max':12}, 'dimension' : 1},
-    'Distribution of signal amplitude for TS bars':{'xaxis' : 'Bar ID', 'yaxis' : 'Signal Amplitude', 'binning' : {'nBins':12, 'min':0, 'max':12}, 'dimension' : 1},
+    'Distribution of number of hits for TS bars':{'xaxis' : 'Bar ID', 'yaxis' : 'Counts', 'binning' : {'nBins':12, 'min':0, 'max':12}, 'dimension' : 1,},
+    'Distribution of signal amplitude for TS bars':{'xaxis' : 'Bar ID', 'yaxis' : 'Signal Amplitude', 'binning' : {'nBins':12, 'min':0, 'max':12}, 'dimension' : 1,},
+    'Distribution of signal amplitude for TS bars (individual bars)':{'xaxis' : 'Amplitude', 'yaxis' : 'Counts', 'binning' : {'nBins':40, 'min':0, 'max':40000}, 'dimension' : 1, 'bars' : trigScintBarIDs()},
     'Time difference between TS and HCal':{'xaxis' : 'Time difference [ns]', 'yaxis' : 'Counts', 'binning' : {'nBins':50, 'min':0, 'max':50}, 'dimension' : 1},
+    'barTest' :{'xaxis' : 'Energy [MeV]', 'yaxis' : 'Counts', 'binning' : {'nBins':40, 'min':0, 'max':40} , 'dimension' : 1},
+
+
+    'Distribution of number of hits of each bar':{'xaxis' : 'Hit count', 'yaxis' : 'Number of events', 'binning' : {'nBins':2, 'min':0, 'max':2}, 'dimension' : 1},
+    'Distribution of pulse height of each bar':{'xaxis' : 'Amplitude [mV]', 'yaxis' : 'Number of events', 'binning' : {'nBins':100, 'min':0, 'max':0}, 'dimension' : 1, 'bars' : hcalBarIDs()},
+
+    'Mapped distribution of number of hits of each bar':{'xaxis' : 'Layer number', 'yaxis' : 'Bar number', 'dimension' : 2,
+                    'binningX' : {'nBins':19, 'min':0, 'max':19}, 
+                    'binningY' : {'nBins':12, 'min':0, 'max':12}}, 
+    #2
+    'Reconstructed energy for tags':{'xaxis' : 'Response fraction [eV/eV]', 'yaxis' : 'Number of events', 'binning' : {'nBins':110, 'min':0, 'max':1.1}, 'dimension' : 1},                
+    'Energy as a function of the incoming particle angle':{'xaxis' : 'Angle [deg]', 'yaxis' : 'Energy deposited [MeV]', 'binning' : {'nBins':5, 'min':0, 'max':50}, 'dimension' : 1},
+    #3
+    'Distribution of PEs per HCal bar':{'xaxis' : 'PE count []', 'yaxis' : 'Number of events', 'binning' : {'nBins':100, 'min':0, 'max':0}, 'dimension' : 1, 'bars' : hcalBarIDs()},
+    'Mapped Distribution of PEs per HCal bar':{'xaxis' : 'Layer number', 'yaxis' : 'Bar number', 'dimension' : 2,
+                    'binningX' : {'nBins':19, 'min':0, 'max':19}, 
+                    'binningY' : {'nBins':12, 'min':0, 'max':12}}, 
 
     }    

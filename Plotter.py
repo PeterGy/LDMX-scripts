@@ -9,6 +9,7 @@
 
 
 from Histograms import *
+from HistogramFiller import *
 from numpy import *
 import ROOT as r
 import pdb
@@ -34,6 +35,19 @@ def unabbreviate(str):
     elif str == "e+0.5": return "500 MeV positrons"
     else: return str
 
+             
+
+def barName(id):
+    if id is False: return "Machine"
+    if id <20: return "bar"+str(id) #it means it is TS
+    shortID = id-402654208
+    layer = int(shortID/1024)
+    bar = shortID%1024
+    return "layer"+str(layer)+"_bar"+str(bar)
+
+
+
+
 def createCanvas():
     return r.TCanvas( 'c1', 'Histogram Drawing Options',1000,1000 )
 
@@ -43,11 +57,12 @@ def createPad(plotDimension):
     pad.cd()
     pad.SetGridx()
     pad.SetGridy()
-    pad.SetLogy()  
+      
     pad.GetFrame().SetFillColor( 18 ) 
     if plotDimension == 1:
         pad.SetRightMargin(0.05)
         pad.SetLeftMargin(0.1)  
+        # pad.SetLogy()
     elif plotDimension == 2:
         pad.SetRightMargin(0.12)
         pad.SetLeftMargin(0.14)
@@ -62,13 +77,17 @@ def createInfoBox():
      #sets what the top right box should say. "" for nothing.
     r.gStyle.SetOptStat("ne")  
 
-def createLabel():
+
+
+
+def createLabel(fwhm=None):
     label = r.TLatex()
     label.SetTextFont(42)
     label.SetTextSize(0.03)
-    label.SetNDC()
+    label.SetNDC()    
+    if fwhm: label.DrawLatex(0,  0.005, "FWHM:  "+str(round(fwhm,6)))
     return label
-    # label.DrawLatex(0,  0.97, "Default: 0.5 GeV e-")
+
 
 def drawLine(plotDimension,lines):
     # hist.SetOption("")
@@ -79,266 +98,7 @@ def drawLine(plotDimension,lines):
         lines[-1].Draw("COLZ SAME")  
 
 
-def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxEDeposit=float('inf')):
-    allowNoise= False
-    if   plotVar == 'simX': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getEdep() > minEDeposit and h.getEdep() < maxEDeposit:
-                    hist.Fill(h.getPosition()[0])                  
-    elif plotVar == 'simY': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getEdep() > minEDeposit and h.getEdep() < maxEDeposit:
-                    hist.Fill(h.getPosition()[1])  
-    elif plotVar == 'simZ': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getEdep() > minEDeposit and h.getEdep() < maxEDeposit:
-                    hist.Fill(h.getPosition()[2]) 
-    elif plotVar == 'simE': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getEdep() > minEDeposit and h.getEdep() < maxEDeposit:
-                    hist.Fill(h.getEdep()) 
-                # print("Sim id",h.getID()-4026e5)               
-    elif plotVar == 'simEH1': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getPosition()[2] < 0: hist.Fill(h.getEdep())              
-    elif plotVar == 'simEH2': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getPosition()[2] > 0: hist.Fill(h.getEdep()) 
 
-
-    elif plotVar == 'simEBar': 
-        for entry in allData: 
-            bars={}
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                try: bars[h.getID()]+=h.getEdep()
-                except: bars[h.getID()]=h.getEdep()                            
-            for bar in bars:
-                hist.Fill(bars[bar])
-        print(bars) 
-                
-       
-
-    elif plotVar == 'recEBar': 
-        for entry in allData: 
-            bars={}
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                try: bars[h.getID()]+=h.getPE()
-                except: bars[h.getID()]=h.getPE()                           
-            for bar in bars:
-                hist.Fill(bars[bar]) 
-
-    elif plotVar == 'recEventBar': 
-        for entry in allData: 
-            bars={}
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                hist.Fill(h.getID())
-                #402654211:402668549
-
-    elif plotVar == 'recBarEvent': 
-        bars={}
-        for entry in allData:             
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                try: bars[h.getID()]+=1
-                except: bars[h.getID()]=1
-        barOrder=[]                               
-        for bar in bars:
-            barOrder.append(bar)
-        barOrder.sort()      
-        hist = r.TH1F(plotVar,"Event counts in each bar", len(bars) ,0,len(bars)) 
-        for i in range(len(barOrder)):
-            hist.Fill(i,bars[barOrder[i]])
-
-        hist.SetYTitle('counts')
-        hist.SetXTitle('bar ranking in bar ID')
-
-    elif plotVar == 'recE': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                if h.isNoise() == allowNoise: 
-                    hist.Fill(h.getEnergy()) 
-  
-    elif plotVar == 'recENoisy': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                    hist.Fill(h.getEnergy()) 
-  
-    elif plotVar == 'recX': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                if h.isNoise() == allowNoise: hist.Fill(h.getXPos()) 
-    elif plotVar == 'recY': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                if h.isNoise() == allowNoise: hist.Fill(h.getYPos()) 
-    elif plotVar == 'recZ': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                if h.isNoise() == allowNoise: hist.Fill(h.getZPos()) 
-
-
-    elif plotVar == 'Total number of hits per event': 
-        for event in allData: 
-            totalCount=0
-            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
-                totalCount+=1
-            hist.Fill(totalCount) 
-        hist.BufferEmpty() #figures out the xrange        
-        minX = hist.GetXaxis().GetBinLowEdge(1)
-        maxX = hist.GetXaxis().GetBinLowEdge(11)
-        hist.SetBins(int(maxX - minX),minX,maxX) #makes it so there is one bin per event
-
-
-    elif plotVar == 'Sum of pulse height per event': 
-        for event in allData: 
-            totalAmplitude=0
-            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
-                totalAmplitude+=h.getAmplitude()
-            hist.Fill(totalAmplitude) 
-        hist.BufferEmpty() #figures out the xrange        
-        minX = hist.GetXaxis().GetBinLowEdge(1)
-        maxX = hist.GetXaxis().GetBinLowEdge(11)
-        hist.SetBins(int(maxX - minX),minX,maxX) #makes it so there is one bin per ns
-
-
-
-    elif plotVar == 'Total number of hits per run': 
-        totalAmplitude=0
-        for event in allData:             
-            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
-                totalAmplitude+=1
-                # totalAmplitude+=h.getAmplitude()
-        hist.Fill(totalAmplitude) 
-
-    elif plotVar == 'recAmp': 
-        entryCount=0
-        for entry in allData: 
-            entryCount+=1
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                if h.isNoise() == allowNoise: hist.Fill(h.getAmplitude()) 
-
-                    #h.getID() repeats even in rec mode
-                    # print("rec id",h.getID()-4026e5)
-        print(entryCount)            
-    elif plotVar == 'recPE': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                if h.isNoise() == allowNoise: hist.Fill(h.getPE()) 
-
-    #the whole hcal F(x) thing is wrong, be careful
-    elif plotVar == 'simX(Z)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getEdep() > minEDeposit and h.getEdep() < maxEDeposit:
-                    hist.Fill(h.getPosition()[2],h.getPosition()[0])
-                # hist.Fill(h.getPosition()[2],h.getPosition()[0])
-    elif plotVar == 'simY(Z)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getEdep() > minEDeposit and h.getEdep() < maxEDeposit:
-                    hist.Fill(h.getPosition()[2],h.getPosition()[1])            
-    elif plotVar == 'simY(X)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getEdep() > minEDeposit and h.getEdep() < maxEDeposit:
-                    hist.Fill(h.getPosition()[1],h.getPosition()[0])                 
-
-    elif plotVar == 'simE(X)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getEdep() > minEDeposit and h.getEdep() < maxEDeposit:
-                    hist.Fill(h.getPosition()[0],h.getEdep()) 
-    elif plotVar == 'simE(Z)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalSimHits_"+processName)):
-                if h.getEdep() > minEDeposit and h.getEdep() < maxEDeposit:
-                    hist.Fill(h.getPosition()[2],h.getEdep()) 
-    
-    elif plotVar == 'recX(Z)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                if h.isNoise() == allowNoise: hist.Fill(h.getZPos(),h.getXPos()) 
-    elif plotVar == 'recY(Z)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                if h.isNoise() == allowNoise: hist.Fill(h.getZPos(),h.getYPos()) 
-    elif plotVar == 'recY(X)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "HcalRecHits_"+processName)):
-                if h.isNoise() == allowNoise: hist.Fill(h.getYPos(),h.getXPos()) 
-
-    elif plotVar == 'trigSimX':  #unimplemented
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "TriggerPadUpSimHits_"+processName)):
-                hist.Fill(h.getPosition()[0])       
-    elif plotVar == 'trigSimE': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "TriggerPadUpSimHits_"+processName)):
-                hist.Fill(h.getEdep())      
-                
-    #trig f(x) works               
-    elif plotVar == 'trigSimX(Z)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "TriggerPadUpSimHits_"+processName)):
-                hist.Fill(h.getPosition()[2],h.getPosition()[0])   
-    elif plotVar == 'trigSimY(Z)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "TriggerPadUpSimHits_"+processName)):
-                hist.Fill(h.getPosition()[2],h.getPosition()[1])            
-    elif plotVar == 'trigSimY(X)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "TriggerPadUpSimHits_"+processName)):
-                hist.Fill(h.getPosition()[0],h.getPosition()[1])                 
-    elif plotVar == 'trigSimE(X)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "TriggerPadUpSimHits_"+processName)):
-                hist.Fill(h.getPosition()[0],h.getEdep()) 
-    elif plotVar == 'trigSimE(Z)': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "TriggerPadUpSimHits_"+processName)):
-                hist.Fill(h.getPosition()[2],h.getEdep()) 
-
-
-    # elif plotVar == 'trigRecX': 
-        # for entry in allData: 
-            # for ih,h in enumerate(getattr(entry, "trigScintRecHitsUp_"+processName)):
-                # print(h.getYPos())
-                # hist.Fill(h.getXPos()) 
-                # print(h.items()) 
-
-    elif plotVar == 'trigRecT': 
-        for entry in allData: 
-            for ih,h in enumerate(getattr(entry, "trigScintRecHitsUp_"+processName)):
-                if h.getBarID() ==6: hist.Fill(h.getTime()) 
-                # print(h.getBarID())
-                # print(h.items()) 
-
-    elif plotVar == 'Distribution of number of hits for TS bars': 
-        for event in allData: 
-            for ih,h in enumerate(getattr(event, "trigScintRecHitsUp_"+processName)):
-                hist.Fill(h.getBarID())
-
-    elif plotVar == 'Distribution of signal amplitude for TS bars': 
-        for event in allData: 
-            for ih,h in enumerate(getattr(event, "trigScintRecHitsUp_"+processName)):
-                hist.Fill(h.getBarID(),h.getAmplitude())
-
-    elif plotVar == 'Time difference between TS and HCal': 
-        for event in allData: #I define time difference based on the first event's time
-            trigTimes=[]
-            hcalTimes=[]
-            for ih,h in enumerate(getattr(event, "trigScintRecHitsUp_"+processName)):
-                trigTimes.append(h.getTime())
-            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
-                hcalTimes.append(h.getTime())
-            hist.Fill(min(hcalTimes)-min(trigTimes))
-
-    return hist                
 
   
 def createHist(plotDict,plotVar):
@@ -391,6 +151,14 @@ def getPlotDimension(plotNumber):
     dimension = plotDict[plotType]['dimension']
     return dimension
 
+def getPlotBars(plotNumber):
+    plot = plotGroups[plotNumber]
+    line = plot[0]
+    plotType = line[0]    
+    try: bars = plotDict[plotType]['bars']
+    except: bars = [False]
+    return bars   
+
 def normaliseHist():
     if plotDimension == 1: 
         try: 
@@ -399,30 +167,60 @@ def normaliseHist():
             hist.SetMaximum(1)                    
         except: print("didnt normalise")
 
-# def main():       
-for plotNumber in range(len(plotGroups)): #creates a plot
-    plotDimension =  getPlotDimension(plotNumber)
-    canvas = createCanvas()
-    createInfoBox()
-    pad = createPad(plotDimension)      
-    legend = createLegend()        
-    lines=[]     
-    for j in plotGroups[plotNumber]: #creates a line for each variable in the plot
-        plotVar = var  = j[0]
-        fileName = j[1]           
-        inFile = r.TFile(fileName+".root","READ")  
-        allData = inFile.Get("LDMX_Events")                   
-        hist = createHist(plotDict,plotVar)                               
-        hist = fillHist(hist, plotVar, allData) 
-        #normaliseHist(plotDimension)                                        
-        lines.append(copy.deepcopy(hist))                  
-        drawLine(plotDimension,lines) 
-        legend.AddEntry(lines[-1],fileName,"f")
-   
-    if plotDimension == 1: legend.Draw();
-    canvas.SaveAs("plots/Plot"+str(plotNumber)+".png")
-    canvas.Close() #memory leak killer
+def main():       
+    for plotNumber in range(len(plotGroups)): #creates a plot
+        plotDimension =  getPlotDimension(plotNumber)
+        barIDs = getPlotBars(plotNumber)
+        for id in barIDs:
+            canvas = createCanvas()
+            createInfoBox()
+            pad = createPad(plotDimension)      
+            legend = createLegend()        
+            lines=[]     
+            for j in plotGroups[plotNumber]: #creates a line for each variable in the plot
+                plotVar = var  = j[0]
+                fileName = j[1]           
+
+                inFile = r.TFile(fileName+".root","READ")   
+                allData = inFile.Get("LDMX_Events")                   
+                hist = createHist(plotDict,plotVar)         
+                
+                if plotVar == 'Energy as a function of the incoming particle angle':
+                    angles = [angle for angle in range(0,50,10)]
+                    inFiles= [r.TFile('e-1GeV'+str(angle)+"deg.root","READ")  for angle in angles ]
+                    allDatas=[f.Get("LDMX_Events")  for f in inFiles]
+                    for i in range(len(angles)): 
+                        filledHist = fillHist(hist, plotVar, allDatas[i],angle=angles[i])
+
+                else:
+                    filledHist = fillHist(hist, plotVar, allData, barID=id)
+                
+                #normaliseHist(plotDimension)                                        
+                lines.append(copy.deepcopy(filledHist.hist))                  
+                drawLine(plotDimension,lines) 
+                legend.AddEntry(lines[-1],fileName,"f")
+        
+            if plotDimension == 1 or 2: legend.Draw();
+            if hasattr(filledHist, 'fwhm'): 
+                createLabel(fwhm=filledHist.fwhm)
+                del filledHist.fwhm
 
 
-# if __name__=="__main__":
-#     main()
+
+            canvas.SaveAs("plots/Plot"+str(plotNumber)+"____"+barName(id)+".png")
+            # canvas.SaveAs("plots/"+str(plotNumber)+".png")
+            canvas.Close() #memory leak killer
+
+
+
+#aaah the implementation
+
+# barIDs = hcalBarIDs()
+# barIDs = range(0,12) #trigScintBarIDs
+
+# if badIDs != "machine":
+# for id in barIDs:
+#         main(id)
+
+# else: main(id)
+main()
