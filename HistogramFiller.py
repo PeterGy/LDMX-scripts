@@ -15,13 +15,19 @@ def autoBin(hist):
     # print(minX,maxX)
     hist.SetBins(int(maxX)+1-int(minX),int(minX),int(maxX)+1) #makes it so there is one bin per event or ns, and the rightmost bin is still included
 
-def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxEDeposit=float('inf'), barID=False, angle=0):
+def getFWHM(hist):
+    bin1 = hist.FindFirstBinAbove(hist.GetMaximum()/2)
+    bin2 = hist.FindLastBinAbove(hist.GetMaximum()/2)
+    fwhm = hist.GetBinCenter(bin2) - hist.GetBinCenter(bin1)
+    return fwhm
+
+def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxEDeposit=float('inf'), barID=False, angle=0, beamEnergy=0):
     allowNoise= False
     if   plotVar == 'simX': 
         for event in allData: 
             for ih,h in enumerate(getattr(event, "HcalSimHits_"+processName)):
                 if h.getEdep() > minEDeposit and h.getEdep() < maxEDeposit:
-                    hist.Fill(h.getPosition()[0])                  
+                    hist.Fill(h.getPosition()[0])                     
     elif plotVar == 'simY': 
         for event in allData: 
             for ih,h in enumerate(getattr(event, "HcalSimHits_"+processName)):
@@ -46,8 +52,6 @@ def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxE
         for event in allData: 
             for ih,h in enumerate(getattr(event, "HcalSimHits_"+processName)):
                 if h.getPosition()[2] > 0: hist.Fill(h.getEdep()) 
-
-
     elif plotVar == 'simEBar': 
         for event in allData: 
             bars={}
@@ -55,9 +59,7 @@ def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxE
                 try: bars[h.getID()]+=h.getEdep()
                 except: bars[h.getID()]=h.getEdep()                            
             for bar in bars:
-                hist.Fill(bars[bar])
-                
-       
+                hist.Fill(bars[bar])     
 
     elif plotVar == 'recEBar': 
         for event in allData: 
@@ -319,16 +321,12 @@ def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxE
 
     #2
     elif plotVar == 'Reconstructed energy for tags': #might wanna make beam energy automatic
-        beamEnergy=1e3
         for event in allData: 
             energy=0
             for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
                 energy+=h.getEnergy()
             hist.Fill(energy/beamEnergy) 
-        bin1 = hist.FindFirstBinAbove(hist.GetMaximum()/2)
-        bin2 = hist.FindLastBinAbove(hist.GetMaximum()/2)
-        fwhm = hist.GetBinCenter(bin2) - hist.GetBinCenter(bin1)
-        filledHist.fwhm = fwhm
+        filledHist.fwhm = getFWHM(hist)
 
     elif plotVar == 'Energy as a function of the incoming particle angle':
         for event in allData:             
@@ -336,11 +334,67 @@ def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxE
                 hist.Fill(angle,h.getEnergy())    
 
     #3
+    elif plotVar == 'Distribution of PEs per HCal bar': 
+        for event in allData: 
+            PEs = 0
+            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
+                if h.getID() == barID: 
+                    PEs += h.getPE() 
+            hist.Fill(PEs)            
+        autoBin(hist)
+
+
     elif plotVar == 'Mapped Distribution of PEs per HCal bar': 
         for event in allData: 
             for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
                 LayerBar = barMapLocation(h.getID())
                 hist.Fill(LayerBar[0],LayerBar[1],h.getPE())            
+
+    elif plotVar == 'TS plots w/ muons (hit efficiency) (1 plot per bar)': 
+        for event in allData: 
+            hits=0
+            for ih,h in enumerate(getattr(event, "trigScintRecHitsUp_"+processName)):
+                    if h.getBarID() == barID: 
+                        hits+=1
+            hist.Fill(hits)  
+        autoBin(hist)  
+
+    elif plotVar == 'TS plots w/ muons (hit efficiency)': 
+        eventCount=allData.GetEntries()
+        for event in allData: 
+            for ih,h in enumerate(getattr(event, "trigScintRecHitsUp_"+processName)):
+                # print(h.getBarID())
+                hist.Fill(h.getBarID(),1/eventCount)  
+        # autoBin(hist)
+        # print(eventCount)
+
+    elif plotVar == 'TS plots w/ muons (light yield)': 
+        for event in allData: 
+            for ih,h in enumerate(getattr(event, "trigScintRecHitsUp_"+processName)):
+                    if h.getBarID() == barID: 
+                        hist.Fill(h.getPE())  
+        autoBin(hist)                
+
+    elif plotVar == 'TS plots w/ muons (pulse shape)': 
+        for event in allData: 
+            for ih,h in enumerate(getattr(event, "trigScintRecHitsUp_"+processName)):
+                    if h.getBarID() == barID: 
+                        # hist.Fill(h.getTime())  
+                        hist.Fill(h.getTime(),h.getAmplitude())  
+        autoBin(hist)
+
+    elif plotVar == 'energy response vs. energy (1 plot)':
+        for event in allData:             
+            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
+                hist.Fill(angle,h.getEnergy())  
+
+    elif plotVar == 'energy response vs. energy': #might wanna make beam energy automatic
+        for event in allData: 
+            energy=0
+            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
+                energy+=h.getEnergy()
+            hist.Fill(energy/beamEnergy) 
+        filledHist.fwhm = getFWHM(hist)
 
     filledHist.hist = hist
     return filledHist   
