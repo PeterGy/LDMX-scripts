@@ -33,56 +33,56 @@ def trigScintBarIDs():
 
 testbeamPlotGroups = [
 
-    #1.1
-    # (('Distribution of number of hits of each bar',"muon"),), 
-    (('Mapped distribution of number of hits of each bar',"e-1GeV1k"),),
+    # #1.1
+    # # (('Distribution of number of hits of each bar',"e-1GeV1k"),), 
+    # (('Mapped distribution of number of hits of each bar',"e-1GeV1k"),),
     #1.2
-    # (('Distribution of pulse height of each bar',"electron"),), #192
+    # (('Distribution of pulse height of each bar',"e-1GeV1k"),), #192
     
-    #1.3
-    (('Sum of pulse height per run',"runs"),),
-    (('Sum of pulse height per event',"runs"),),    
-    (('Total number of hits per event',"runs"),),
-    (('Total number of hits per run',"runs"),),    
-    #1.4
-    (('Distribution of number of hits for TS bars',"electron"),), 
-    (('Distribution of signal amplitude for TS bars',"electron"),), 
-    (('Distribution of signal amplitude for TS bars (individual bars)',"electron"),), #12
-    #1.5
-    (('Time difference between TS and HCal',"electron"),), 
-    #2.1
-    (('Reconstructed energy for tags',"e-1GeV1k"),), 
-    #2.2
-    (('Reconstructed energy for tags',"pi-1GeV1k"),), 
-    #2.3
-    (('Energy as a function of the incoming particle angle',"pi-1GeV1k"),),
-    #3.1
+    # #1.3
+    # (('Sum of pulse height per run',"runs"),),
+    # (('Sum of pulse height per event',"runs"),),    
+    # (('Total number of hits per event',"runs"),),
+    # (('Total number of hits per run',"runs"),),    
+    # #1.4
+    # (('Distribution of number of hits for TS bars',"e-1GeV1k"),), 
+    # (('Distribution of signal amplitude for TS bars',"e-1GeV1k"),), 
+    # # (('Distribution of signal amplitude for TS bars (individual bars)',"e-1GeV1k"),), #12
+    # #1.5
+    # (('Time difference between TS and HCal',"e-1GeV1k"),), 
+    # #2.1
+    # (('Reconstructed energy for tags',"e-1GeV1k"),), 
+    # #2.2
+    # (('Reconstructed energy for tags',"pi-1GeV1k"),), 
+    # #2.3
+    # (('Energy as a function of the incoming particle angle',"e-1GeV0deg"),),
+    # #3.1
     # (('Distribution of PEs per HCal bar',"mu-4GeV1k"),), #192
     # (('Mapped Distribution of PEs per HCal bar',"mu-4GeV1k"),),
 
     #3.2
-    (('TS plots w/ muons (hit efficiency)',"mu-4GeV1k"),), #1
-    (('TS plots w/ muons (light yield)',"mu-4GeV1k"),), #12
-    (('TS plots w/ muons (pulse shape)',"mu-4GeV1k"),), #12
+    # (('TS plots w/ muons (hit efficiency)',"mu-4GeV1k"),), #1
+    # (('TS plots w/ muons (light yield)',"mu-4GeV1k"),), #12
+    # (('TS plots w/ muons (pulse shape)',"mu-4GeV1k"),), #12
     #5
-
     (('energy response vs. energy',"pi-8GeV1k"),), #1
     (('energy response vs. energy',"pi-4GeV1k"),), #1
     (('energy response vs. energy',"pi-2GeV1k"),), #1
     (('energy response vs. energy',"pi-1GeV1k"),), #1
     (('energy response vs. energy',"pi-0.5GeV1k"),), #1
-    (('energy response vs. energy',"e-8GeV1k"),), #1
-    (('energy response vs. energy',"e-4GeV1k"),), #1
-    (('energy response vs. energy',"e-2GeV1k"),), #1
-    (('energy response vs. energy',"e-1GeV1k"),), #1
-    (('energy response vs. energy',"e-0.5GeV1k"),), #1
+    # (('energy response vs. energy',"e-8GeV1k"),), #1
+    # (('energy response vs. energy',"e-4GeV1k"),), #1
+    # (('energy response vs. energy',"e-2GeV1k"),), #1
+    # (('energy response vs. energy',"e-1GeV1k"),), #1
+    # (('energy response vs. energy',"e-0.5GeV1k"),), #1
     
 
     
 ]
 plotGroups = [
+    (('energy response vs. energy',"pi-8GeV1k"),('energy response vs. energy',"pi-4GeV1k"),('energy response vs. energy',"pi-2GeV1k"),('energy response vs. energy',"pi-1GeV1k"),('energy response vs. energy',"pi-0.5GeV1k"),), #1
+    (('energy response vs. energy',"e-8GeV1k"),('energy response vs. energy',"e-4GeV1k"),('energy response vs. energy',"e-2GeV1k"),('energy response vs. energy',"e-1GeV1k"),('energy response vs. energy',"e-0.5GeV1k"),), #1
 
-    (('Sum of pulse height per event',"e-1GeV1k"),),  
     ]         
 
 # plotGroups = testbeamPlotGroups   
@@ -94,8 +94,8 @@ barBinsZ = hcalBinning()
 plotDict = {
     'Total number of hits per event'   :{'xaxis' : 'Hits', 'yaxis' : 'Event count', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1 }, #0,0 min-max makes the xrange automatic. nbins must be 10 so my program can manually set nbins to be the value it should really be automatically
     'Total number of hits per run'   :{'xaxis' : 'Hits', 'yaxis' : 'Run count', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1 }, #0,0 min-max makes the xrange automatic. nbins must be 10 so my program can manually set nbins to be the value it should really be automatically
-    'Sum of pulse height per event' :{'xaxis' : 'Pulse height [??]', 'yaxis' : 'Event count', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1 },
-    'Sum of pulse height per run' :{'xaxis' : 'Pulse height [??]', 'yaxis' : 'Run count', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1 },
+    'Sum of pulse height per event' :{'xaxis' : 'Pulse height [mV]', 'yaxis' : 'Event count', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1 },
+    'Sum of pulse height per run' :{'xaxis' : 'Pulse height [mV]', 'yaxis' : 'Run count', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1 },
 
 
     'simE'   :{'xaxis' : 'Energy [MeV]', 'yaxis' : 'Counts', 'binning' : {'nBins':40, 'min':0, 'max':40}, 'dimension' : 1 },
@@ -205,11 +205,11 @@ plotDict = {
     'Distribution of pulse height of each bar':{'xaxis' : 'Amplitude [mV]', 'yaxis' : 'Number of events', 'binning' : {'nBins':100, 'min':0, 'max':0}, 'dimension' : 1, 'bars' : hcalBarIDs()},
 
     'Mapped distribution of number of hits of each bar':{'xaxis' : 'Layer number', 'yaxis' : 'Bar number', 'dimension' : 2,
-                    'binningX' : {'nBins':19, 'min':0, 'max':19}, 
-                    'binningY' : {'nBins':12, 'min':0, 'max':12}}, 
+                    'binningX' : {'nBins':19, 'min':-0.5, 'max':18.5}, 
+                    'binningY' : {'nBins':12, 'min':-0.5, 'max':11.5}}, 
     #2
     'Reconstructed energy for tags':{'xaxis' : 'Response fraction [eV/eV]', 'yaxis' : 'Number of events', 'binning' : {'nBins':110, 'min':0, 'max':1.1}, 'dimension' : 1},                
-    'Energy as a function of the incoming particle angle':{'xaxis' : 'Angle [deg]', 'yaxis' : 'Energy deposited [MeV]', 'binning' : {'nBins':5, 'min':0, 'max':50}, 'dimension' : 1},
+    'Energy as a function of the incoming particle angle':{'xaxis' : 'Angle [deg]', 'yaxis' : 'Energy deposited [MeV]', 'binning' : {'nBins':50, 'min':0, 'max':50}, 'dimension' : 1},
     #3
     'Distribution of PEs per HCal bar':{'xaxis' : 'PE count', 'yaxis' : 'Number of events', 'binning' : {'nBins':100, 'min':0, 'max':0}, 'dimension' : 1, 'bars' : hcalBarIDs()},
     'Mapped Distribution of PEs per HCal bar':{'xaxis' : 'Layer number', 'yaxis' : 'Bar number', 'dimension' : 2,
@@ -218,7 +218,8 @@ plotDict = {
     'TS plots w/ muons (hit efficiency) (1 plot per bar)':{'xaxis' : 'Hits per event', 'yaxis' : 'Number of events', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1, 'bars' : trigScintBarIDs()},
     'TS plots w/ muons (hit efficiency)':{'xaxis' : 'Bar', 'yaxis' : 'Hits', 'binning' : {'nBins':12, 'min':0, 'max':12}, 'dimension' : 1,},
     'TS plots w/ muons (light yield)':{'xaxis' : 'PE count', 'yaxis' : 'Number of events', 'binning' : {'nBins':1000, 'min':0, 'max':0}, 'dimension' : 1, 'bars' : trigScintBarIDs()},
-    'TS plots w/ muons (pulse shape)':{'xaxis' : 'Time [ns]', 'yaxis' : 'Amplitude [mV]', 'binning' : {'nBins':100, 'min':0, 'max':0}, 'dimension' : 1, 'bars' : trigScintBarIDs()},
-    'energy response vs. energy (1 plot)':{'xaxis' : 'Beam Energy [GeV]', 'yaxis' : 'Energy response [mV]', 'binning' : {'nBins':100, 'min':0, 'max':10}, 'dimension' : 1,},
+    'TS plots w/ muons (pulse shape)':{'xaxis' : 'Time [ns]', 'yaxis' : 'Amplitude [mV]', 'binning' : {'nBins':100, 'min':2, 'max':3}, 'dimension' : 1, 'bars' : trigScintBarIDs()}, #can be autobinned badly
+    'energy response vs. energy (1 plot)':{'xaxis' : 'Beam Energy [GeV]', 'yaxis' : 'Energy response [MeV]', 'binning' : {'nBins':100, 'min':0, 'max':10}, 'dimension' : 1,},
     'energy response vs. energy':{'xaxis' : 'Response fraction [eV/eV]', 'yaxis' : 'Number of events', 'binning' : {'nBins':110, 'min':0, 'max':1.1}, 'dimension' : 1},
+    'rec vs sim':{'xaxis' : 'Response fraction [eV/eV]', 'yaxis' : 'Number of events', 'binning' : {'nBins':110, 'min':0, 'max':1.1}, 'dimension' : 1},
     }    

@@ -381,12 +381,18 @@ def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxE
                     if h.getBarID() == barID: 
                         # hist.Fill(h.getTime())  
                         hist.Fill(h.getTime(),h.getAmplitude())  
-        autoBin(hist)
+                        if barID == 5: 
+                            if h.getTime() !=2.5:
+                                print(h.getTime())
+        # autoBin(hist)
 
     elif plotVar == 'energy response vs. energy (1 plot)':
         for event in allData:             
             for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
                 hist.Fill(angle,h.getEnergy())  
+
+            # for ih,h in enumerate(getattr(event, "HcalSimHits_"+processName)):
+            #     hist.Fill(angle,h.getEdep())  
 
     elif plotVar == 'energy response vs. energy': #might wanna make beam energy automatic
         for event in allData: 
@@ -396,6 +402,21 @@ def fillHist(hist, plotVar, allData, processName="process" , minEDeposit=0, maxE
             hist.Fill(energy/beamEnergy) 
         filledHist.fwhm = getFWHM(hist)
 
+    elif plotVar == 'rec vs sim':
+        recE=0
+        simE=0
+        for event in allData:             
+            for ih,h in enumerate(getattr(event, "HcalRecHits_"+processName)):
+                recE+=h.getEnergy()
+                hist.Fill(h.getEnergy())
+            for ih,h in enumerate(getattr(event, "HcalSimHits_"+processName)):
+                simE+=h.getEdep()
+                hist.Fill(h.getEdep())  
+        print ("Total simulated energy deposit:",simE)          
+        print ("Total reconstructed energy deposit:",recE)   
+
+
     filledHist.hist = hist
     return filledHist   
 
+       
