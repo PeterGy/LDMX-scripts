@@ -132,7 +132,8 @@ def drawLines(plotDimension,lines,options=''):
 def createHist(plotDict,plotVar,id):
     if plotDict[plotVar]['dimension'] == 1:     
         histTitle = plotVar
-        histName = barName(id)          
+        histName = 'Test'#barName(id)          
+        print("The name",histName)
         binning = plotDict[plotVar]['binning']                
         if type(binning) == type({}):                     
             hist = r.TH1F(histName,histTitle, binning['nBins'],binning['min'],binning['max']) #name, title, nbins, start, finish          
@@ -214,6 +215,7 @@ def main():
     for plotNumber in range(len(plotGroups)): #creates a plot
         plotDimension =  getPlotDimension(plotNumber)
         barIDs = getPlotBars(plotNumber)
+        extractionName = ""
         for id in barIDs:
             canvas = createCanvas()
             createInfoBox()
@@ -223,6 +225,7 @@ def main():
             
             for j in plotGroups[plotNumber]: #creates a line for each variable in the plot
                 plotVar = var  = j[0]
+                extractionName = plotVar
                 fileName = j[1]           
 
                 inFile = r.TFile(fileName+".root","READ")   
@@ -261,11 +264,19 @@ def main():
             # canvas.SaveAs("plots/Plot"+str(plotNumber)+"__"+barName(id)+"_linear.png")
             canvas.SaveAs("plots/Plot"+str(plotNumber)+"__"+barName(id)+"_linear.png")
 
-            if plotDimension==1:
-                pad.SetLogy()
-                drawLines(plotDimension,lines,options="E")
-                decoratePlot(filledHist,plotDimension,legend)
-                canvas.SaveAs("plots/Plot"+str(plotNumber)+"__"+barName(id)+"_logarithmic.png")
+            file = r.TFile("extractions/"+extractionName+".root", "RECREATE")
+
+            for histos in lines:
+                # print(histos)
+                histos.SetDirectory(file)
+                histos.Write()
+            file.Close()
+
+            # if plotDimension==1:
+            #     pad.SetLogy()
+            #     drawLines(plotDimension,lines,options="E")
+            #     decoratePlot(filledHist,plotDimension,legend)
+            #     canvas.SaveAs("plots/Plot"+str(plotNumber)+"__"+barName(id)+"_logarithmic.png")
 
 
             
