@@ -29,15 +29,16 @@ def realChannel_to_SipM(c):#[layer,bar,side]
     return 'too many layers'    
 
 # converts the link-channel provided by the HGCROC into a 'real' channel: goes from 1 to 384, representing a SiPM each
-def LinkChannel_to_realChannel(LinkChannel):
-    channel = LinkChannel[1]-1
+def FpgaLinkChannel_to_realChannel(FpgaLinkChannel):
+    channel = FpgaLinkChannel[2]-1
     if 0 <= channel and channel <= 7:  realChannel = channel
     elif 9 <= channel and channel <= 16:  realChannel = channel-1
     elif 19 <= channel and channel <= 26:  realChannel = channel-3
     elif 28 <= channel and channel <= 35:  realChannel = channel-4
     else: realChannel = None
 
-    if realChannel != None: realChannel+=LinkChannel[0]*32
+    if realChannel != None: realChannel+=FpgaLinkChannel[1]*32
+    if realChannel != None: realChannel+=FpgaLinkChannel[0]*32*6
 
     return realChannel
 
@@ -48,13 +49,17 @@ c.cd()
 hist = ROOT.TH2F('Map', "Mapped SiPM ADCs", 40, 1, 40, 12, 0, 12)
 
 for t in allData : #for event in alldata
-   realChannel = LinkChannel_to_realChannel([t.link,t.channel])
-   if realChannel != None:
-      LayerBarSide = realChannel_to_SipM(realChannel)
-      if LayerBarSide[2]==1: LayerBarSide[0] +=20
-      hist.Fill(LayerBarSide[0],LayerBarSide[1],t.adc) 
+    # if t.fpga != 0:print(t.fpga)
+    realChannel = FpgaLinkChannel_to_realChannel([t.fpga+1,t.link,t.channel])
+    if realChannel != None:
+        LayerBarSide = realChannel_to_SipM(realChannel)
+        if LayerBarSide[2]==1: LayerBarSide[0] +=20
+        hist.Fill(LayerBarSide[0],LayerBarSide[1],t.adc) 
 
 #link is the chip halves, channel is just the channel
+hist.SetYTitle('Bar number')
+hist.SetXTitle('Layer number')
+
 
 hist.Draw("COLZ")
 c.SaveAs("map.png")  
